@@ -71,15 +71,15 @@ inc.putline = function(ind, mat, ano, prof, desc, link) {
 	
 	col = document.createElement('a');
 	col.setAttribute("href", link);
-	/* 1
+	/* 1 (hyperlink) */
 	var hyperlink = document.createTextNode('Download');
 	col.appendChild(hyperlink);
-	*/
-	/* 2 */
+	/* 2 (botão)
 	var linkbut = document.createElement('input');
 	linkbut.setAttribute("type", 'button');
 	linkbut.setAttribute("value", 'Download');
 	col.appendChild(linkbut);
+	*/
 	
 	line.appendChild(col);
 	
