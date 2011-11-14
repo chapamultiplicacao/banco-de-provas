@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<head>
+
+	<style type="text/css">
+		#incsearchform {
+			margin:15px 0;
+		}
+		#incsearchform * {
+			margin:0;
+			padding:0;
+		}
+
+		#incsearchform fieldset {
+			border:0;
+		}
+
+		#incsearchform ul {
+			list-style:none;
+		}
+
+		#incsearchform fieldset li {
+			clear:both;
+			padding:5px 0;
+		}
+
+		#incsearchform label strong {
+			display:block;
+			float:left;
+			width:120px;
+			font-weight:normal;
+		}
+
+		#incsearchform input.text, #incsearchform input.file, #incsearchform select {
+			border:solid 1px #000;
+			background:#eee;
+			font:13px Arial;
+			padding:1px 2px;
+			width:200px;
+		}
+		#incsearchform input.text2 {
+			border:solid 1px #000;
+			background:#eee;
+			font:13px Arial;
+			padding:1px 2px;
+			width:26px;
+			max-width:26px;
+		}
+		#incsearchform input.text3 {
+			border:solid 1px #000;
+			background:#eee;
+			font:13px Arial;
+			padding:1px 2px;
+			width:42px;
+			max-width:42px;
+		}
+		#incsearchform select.v2 {
+			border:solid 1px #000;
+			background:#eee;
+			font:13px Arial;
+			padding:1px 2px;
+			width:165px;
+		}
+
+		#incsearchform input.submit {
+			border:solid 1px #000;
+			background:#333;
+			font:13px Arial;
+			padding:1px 2px;
+			color:#fff;
+		}
+
+		#incsearchform .msg {
+			font-weight:bold;
+			margin:15px 0;
+		}
+	</style>
+</head>
+
+<body>
+	<form id="incsearchform" action="" enctype="multipart/form-data" style="display: none">
+	<fieldset>
+		<ul>
+			<li><label><strong>Nome do professor:</strong>
+				<input type="text" class="text" name="inc_professor" onkeyup="return inc.fieldchange(this);"/>
+			</label></li>
+
+			<li><label><strong>Sigla da disciplina:</strong>
+				<input type="text" class="text" name="inc_disciplina" onkeyup="return inc.fieldchange(this);"/>
+			</label></li>
+			<li><label><strong>Tipo:</strong>
+				<select class="v2" name="inc_tipo" id="inc_descpre" onclick="return inc.descchange();">
+					<option value=""></option>
+					<option value="P">Prova</option>
+					<option value="Provinha">Provinha</option>
+					<option value="L">Lista</option>
+				</select>
+			</label>
+			<label># <input type="text" class="text2" name="inc_numero" id="inc_descsuf" onkeyup="return inc.descchange();"/>
+			</label></li>
+				<li><label><strong>Ano:</strong>
+				<input type="text" class="text3" name="inc_ano" maxlength="4" onkeyup="return inc.fieldchange(this);"/>
+			</label></li>
+			</ul>
+		</fieldset>
+	</form>
+	
+	<style type="text/css">
+		table.seach_output_table {
+			border-width: 3px;
+			border-spacing: 3px;
+			border-style: solid;
+			border-color: gray;
+			border-collapse: separate;
+			background-color: white;
+		}
+		table.seach_output_table th {
+			border-width: 1px;
+			padding: 1px;
+			border-style: double;
+			border-color: gray;
+		}
+		table.seach_output_table td {
+			border-width: 1px;
+			padding: 1px;
+			border-style: solid;
+			border-color: gray;
+		}
+	</style>
+	
+	<table class="seach_output_table">
+		<tr>
+			<th> Matéria </th><th> Ano </th><th> Professor </th><th> Descrição </th> <th></th>
+		</tr>
+		<tbody id="search_output"></tbody>
+	</table>
+	
+	<script type="text/javascript" src="inc_search.js"></script>
+	<script type="text/javascript">
+		inc.init(document.getElementById("search_output"));
+	</script>
+	
+	<applet id="IncSearch"
+		code="IncSearch"
+		archive="banco_provas_search.jar"
+		classpath="plugin.jar , db.jdata"
+		style="width: 1px; height: 1px; float: left;"
+		mayscript>
+	</applet>
+	
+</body>
+
+</html>
