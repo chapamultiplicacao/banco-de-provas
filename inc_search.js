@@ -88,8 +88,9 @@ inc.putline = function(ind, mat, ano, prof, desc, link) {
 	
 	line.appendChild(col);
 	
-	inc.table.appendChild(line);
 	
+	
+	inc.table.appendChild(line);
 	inc.entries[ind] = line;
 }
 
