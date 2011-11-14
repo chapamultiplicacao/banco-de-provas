@@ -70,16 +70,21 @@ inc.putline = function(ind, mat, ano, prof, desc, link) {
 	line.appendChild(col);
 	
 	col = document.createElement('a');
+	col.style.textDecoration = 'none';
 	col.setAttribute("href", link);
-	/* 1 (hyperlink) */
+	/* 1 (hyperlink)
 	var hyperlink = document.createTextNode('Download');
 	col.appendChild(hyperlink);
-	/* 2 (botão)
+	*/
+	/* 2 (botão) */
+	var prefix = document.createTextNode('\u00A0');
+	var suffix = document.createTextNode('\u00A0');
 	var linkbut = document.createElement('input');
 	linkbut.setAttribute("type", 'button');
 	linkbut.setAttribute("value", 'Download');
+	col.appendChild(prefix);
 	col.appendChild(linkbut);
-	*/
+	col.appendChild(suffix);
 	
 	line.appendChild(col);
 	
