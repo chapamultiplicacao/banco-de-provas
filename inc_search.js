@@ -352,28 +352,42 @@ inc.putline = function(ind, mat, ano, prof, desc, link) {
 // inc.table passa a armazenar a tabela com os resultados da busca.
 inc.init = function(t) {
 	inc.table = t;
-	console.log('get');
-	jQuery.getJSON('file:///home/puppi/politics/camat/web/banco-de-provas/db.json', function(data){  
-		console.log('success!')
-		var l = data.length;
-		for(var i = 0; i < l; i++) {
-			for(var j = 0; j < inc.nfields; j++) {
-				if(data[i][j] == "") {
-					data[i][j] = nilstr;
+	
+	console.log('Fazendo pedido http...');
+	$.ajax({
+		url: "db.json",
+		processData: true,
+		data: null,
+		dataType: "json",
+		error: function(x) {
+			alert("Impossível ler o banco de dados.");
+			console.log("Impossível ler o banco de dados.");
+			console.log("responseText: " + x.responseText);
+		},
+		success: function(data){  
+			var l = data.length;
+			for(var i = 0; i < l; i++) {
+				for(var j = 0; j < inc.nfields; j++) {
+					if(data[i][j] == "") {
+						data[i][j] = inc.nilstr;
+					}
 				}
+				
+				data[i].unshift(i);
+				
+				inc.putline.apply(this, data[i]);
 			}
 			
-			data[i].unshift(i);
-			
-			inc.putline.apply(this, data[i]);
-		}
+			console.log('Banco de dados carregado.')
+			document.getElementById("incsearchform").style.display = '';
+		},
 	});
 }
 
 /*
  * Reseta a busca.
- * Por enquanto não é usado, e acho provável que tenha se tornado
- * incompatível com as últimas versões do código Java.
+ * Por enquanto não é usado, e perdeu compatibilidade com as
+ * últimas versões do código.
  */
 inc.reset = function() {
 	for(var i in inc.fieldstate) {
