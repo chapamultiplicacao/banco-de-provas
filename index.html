@@ -84,11 +84,11 @@
 	<fieldset>
 		<ul>
 			<li><label><strong>Nome do professor:</strong>
-				<input type="text" class="text" name="inc_professor" onkeyup="return inc.fieldchange(this);"/>
+				<input type="text" class="text" id="inc_professor" onkeyup="return inc.fieldchange(this);"/>
 			</label></li>
 
 			<li><label><strong>Sigla da disciplina:</strong>
-				<input type="text" class="text" name="inc_disciplina" onkeyup="return inc.fieldchange(this);"/>
+				<input type="text" class="text" id="inc_disciplina" onkeyup="return inc.fieldchange(this);"/>
 			</label></li>
 			<li><label><strong>Tipo:</strong>
 				<select class="v2" name="inc_tipo" id="inc_descpre" onclick="return inc.descchange();">
@@ -101,7 +101,7 @@
 			<label># <input type="text" class="text2" name="inc_numero" id="inc_descsuf" onkeyup="return inc.descchange();"/>
 			</label></li>
 				<li><label><strong>Ano:</strong>
-				<input type="text" class="text3" name="inc_ano" maxlength="4" onkeyup="return inc.fieldchange(this);"/>
+				<input type="text" class="text3" id="inc_ano" maxlength="4" onkeyup="return inc.fieldchange(this);"/>
 			</label></li>
 			</ul>
 		</fieldset>
@@ -137,18 +137,19 @@
 		<tbody id="search_output"></tbody>
 	</table>
 	
+	<script type="text/javascript" src="lib/jquery-1.7.min.js"></script>
+	<script type="text/javascript" src="lib/data_structures.js"></script>
 	<script type="text/javascript" src="inc_search.js"></script>
 	<script type="text/javascript">
 		inc.init(document.getElementById("search_output"));
 	</script>
 	
-	<applet id="IncSearch"
+	<!--applet id="IncSearch"
 		code="IncSearch"
-		archive="banco_provas_search.jar"
-		classpath="plugin.jar , db.jdata"
+		classpath="plugin.jar"
 		style="width: 1px; height: 1px; float: left;"
 		mayscript>
-	</applet>
+	</applet-->
 	
 </body>
 
