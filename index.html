@@ -91,7 +91,7 @@
 				<input type="text" class="text" id="inc_disciplina" onkeyup="return inc.fieldchange(this);"/>
 			</label></li>
 			<li><label><strong>Tipo:</strong>
-				<select class="v2" name="inc_tipo" id="inc_descpre" onclick="return inc.descchange();">
+				<select class="v2" name="inc_tipo" id="inc_descpre" onclick="return inc.descchange();" onchange="return inc.descchange();">
 					<option value=""></option>
 					<option value="P">Prova</option>
 					<option value="Provinha">Provinha</option>
@@ -103,6 +103,15 @@
 				<li><label><strong>Ano:</strong>
 				<input type="text" class="text3" id="inc_ano" maxlength="4" onkeyup="return inc.fieldchange(this);"/>
 			</label></li>
+			<li>
+				<input type="checkbox" id="caseSensitive" onclick="return inc.optionchange(this);" onchange="return inc.optionchange(this);" /><label> Diferenciar maiúsculas de minúsculas</label>
+			</li>
+			<li>
+				<input type="checkbox" id="nilIsntWildcard" onclick="return inc.optionchange(this);" onchange="return inc.optionchange(this);" /><label> Filtrar campos não existentes</label>
+			</li>
+			<li>
+				<input type="button" id="inc_resetbutton" value="Limpar" onclick="inc.reset()" />
+			</li>
 			</ul>
 		</fieldset>
 	</form>
@@ -132,7 +141,7 @@
 	
 	<table class="seach_output_table">
 		<tr>
-			<th> Matéria </th><th> Ano </th><th> Professor </th><th> Descrição </th> <td></td>
+			<th> Matéria </th><th> Ano </th><th> Professor </th><th> Descrição </th> <th style="border-style: none"></th>
 		</tr>
 		<tbody id="search_output"></tbody>
 	</table>

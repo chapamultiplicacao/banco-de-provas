@@ -1,10 +1,28 @@
 // Armazena todos os campos/métodos associados à busca incremental
 var inc = {};
 
-inc.options = {
-	caseSensitive: false,
-	nilIsWildcard: true,
+/*
+ * Opções internas. Não são configuráveis pelo usuário, apenas por edição do código-fonte.
+ */
+inc.internal_options = {
+	// Forma em que o link para os arquivos das provas é apresentado. Pode ser 'button' ou 'text'.
+	link_type: 'button',
+	debug_info: false,
 };
+
+inc.default_options = {
+	caseSensitive: false,
+	nilIsntWildcard: false,
+};
+
+inc.options = (function(){
+	var ret = {};
+	for(var i in inc.default_options) {
+		ret[i] = inc.default_options[i];
+	}
+	
+	return ret;
+});
 
 inc.nilstr = "\u00A0";
 
@@ -87,6 +105,9 @@ inc.visibleList = new LinkedList();
 inc.invisibleList = new LinkedList();
 inc.pendingList = new LinkedList();
 
+/*
+ * Resolve pendências
+ */
 inc.applyPending = function(whichfield) {	
 	for(var iter = inc.pendingList.begin(); iter !== inc.pendingList.end(); iter = iter.next) {
 		if(iter.value[1] == true)
@@ -99,6 +120,11 @@ inc.applyPending = function(whichfield) {
 	}
 }
 
+/*
+ * Normaliza s, em que 'normalizar' tem significado amplo.
+ * Atualmente, apenas torna s lowercase se a busca for case insensitive.
+ * Pode ser implementada de modo a remover acentos (caracteres diacríticos).
+ */
 inc.normalizeString = function(s) {
 	if(inc.options.caseSensitive) {
 		return s;
@@ -107,6 +133,9 @@ inc.normalizeString = function(s) {
 	}
 }
 
+/*
+ * Atualiza a busca para quando algum campo de busca é decrementado (i.e. reduzido).
+ */
 inc.decrementSearch = function(whichfield, newstring) {
 	newstring = inc.normalizeString(newstring);
 	var newlen = newstring.length;
@@ -115,7 +144,7 @@ inc.decrementSearch = function(whichfield, newstring) {
 		var matches = false;
 		var candidate = iter.value.value(whichfield);
 		
-		if(inc.options.nilIsWildcard && candidate == inc.nilstr) {
+		if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
 			matches = true;
 		}
 		else if(candidate.length >= newlen) {
@@ -130,6 +159,11 @@ inc.decrementSearch = function(whichfield, newstring) {
 		}
 	}
 	
+	/*
+	 * Necessário verificar as linhas que já tinham sido removidas anteriormente.
+	 * Se o mecanismo de funcionamento da busca for alterado para só permitir a modificação de um caractere
+	 * por vez, isto pode ser removido (utilizando ao invés uma lista ligada de estados de execução, a la programação funcional)
+	 */
 	for(var iter = inc.invisibleList.begin(); iter !== inc.invisibleList.end(); iter = iter.next) {
 		for(var i = 0; i < inc.nfields; i++) {
 			if(i == whichfield)
@@ -141,7 +175,7 @@ inc.decrementSearch = function(whichfield, newstring) {
 			var matches = false;
 			var candidate = iter.value.value(i);
 			
-			if(inc.options.nilIsWildcard && candidate == inc.nilstr) {
+			if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
 				matches = true;
 			}
 			else if(candidate.length >= newlen) {
@@ -158,6 +192,10 @@ inc.decrementSearch = function(whichfield, newstring) {
 	}
 }
 
+/*
+ * Atualiza a busca para quando algum campo de busca é incrementado (i.e. aumentado).
+ * oldstring é necessariamente um prefixo de newstring.
+ */
 inc.incrementSearch = function(whichfield, oldstring, newstring) {
 	var oldlen = oldstring.length;
 	var newlen = newstring.length;
@@ -166,7 +204,7 @@ inc.incrementSearch = function(whichfield, oldstring, newstring) {
 		var matches = true;
 		var candidate = iter.value.value(whichfield);
 		
-		if(inc.options.nilIsWildcard && candidate == inc.nilstr) {
+		if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
 			matches = true;
 		}
 		else if(candidate.length < newlen) {
@@ -182,33 +220,103 @@ inc.incrementSearch = function(whichfield, oldstring, newstring) {
 	}
 }
 
+/*
+ * Atualiza a busca sem modificação de campos.
+ * Serve para quando alguma opção de busca é alterada.
+ */
 inc.touch = function(whichfield) {
 	if(whichfield == undefined) {
 		for(var i = 0; i < inc.nfields; i++)
-			touch(i);
+			inc.touch(i);
 		return;
 	}
 	
-	var laststr = inc.fieldstate[inc.inversefieldmap[whichfield]];
+	var newstring = inc.fieldstate[inc.inversefieldmap[whichfield]];
+	var newlen = newstring.length;
 	
-	inc.decrementSearch(whichfield, laststr);
-	inc.incrementSearch(whichfield, laststr, laststr);
+	for(var iter = inc.invisibleList.begin(); iter !== inc.invisibleList.end(); iter = iter.next) {
+		var matches = false;
+		var candidate = iter.value.value(whichfield);
+		
+		if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
+			matches = true;
+		}
+		else if(candidate.length >= newlen) {
+			matches = (inc.normalizeString(candidate.substr(0, newlen)) == newstring);
+		}
+		
+		if(matches) {
+			iter.value.ref(whichfield);
+		}
+		else {
+			iter.value.unref(whichfield);
+		}
+	}
+	
+	for(var iter = inc.visibleList.begin(); iter !== inc.visibleList.end(); iter = iter.next) {
+		var matches = true;
+		var candidate = iter.value.value(whichfield);
+		
+		if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
+			matches = true;
+		}
+		else if(candidate.length < newlen) {
+			matches = false;
+		}
+		else {
+			matches = (inc.normalizeString(candidate.substr(0, newlen)) == newstring);
+		}
+		
+		if(matches) {
+			iter.value.ref(whichfield);
+		}
+		else {
+			iter.value.unref(whichfield);
+		}
+	}
+	
+	inc.applyPending(whichfield);
+	
+	if(inc.internal_options.debug_info) {
+		console.log("---------------");
+		console.log("# visible: " + inc.visibleList.size());
+		console.log("# invisible: " + inc.invisibleList.size());
+		console.log("---------------");
+	}
 }
 
 /*
  * Classe para as linhas da tabela.
- * O campo node corresponde ao nó html associado à linha
  */
 inc.Entry = function(ind, position, DOMnode, DOMfieldnodes) {
+	// Índice em entries[]
 	this.index = ind;
+	
+	// Posição na tabela (contando de cima para baixo a partir de 0). Índice em entriesAt[].
 	this.pos = position;
+	
+	// Nó HTML correspondente à linha.
 	this.node = DOMnode;
+	
+	// Array com os nós (filhos de this.node) correspondentes aos campos de texto da linha, i.e. ao conteúdo de texto de suas colunas.
 	this.fieldnodes = DOMfieldnodes;
+	
+	/*
+	 * Bitfield que indica correspondência parciais. (this.mask & (1 << whichfield)) == true indica que this é match parcial para o campo whichfield.
+	 * this deve ser visível sse this.mask == inc.visibilitymask, i.e. se for um match parcial para cada campo de busca.
+	 */
 	this.mask = inc.visibilitymask;
+	
+	// Indica se this está atualmente visível.
 	this.visible = true;
+	
+	// Nó colocado em inc.visibleList ou inc.invisibleList, dependendo do estado de this.visible.
 	this.visibilityNode = inc.visibleList.push_back(this);
+	
+	// Se a visibilidade de this precisa ser alterada, this.pendingNode !== null e é um nó de inc.pendingList.
 	this.pendingNode = null;
 	
+	// Retorna o valor textual para a coluna whichfield da linha.
 	this.value = function(whichfield) {
 		return this.fieldnodes[whichfield].nodeValue;
 	}
@@ -222,7 +330,7 @@ inc.Entry = function(ind, position, DOMnode, DOMfieldnodes) {
 		this.visible = false;
 	}
 	
-	this.show = function() {		
+	this.show = function() {
 		this.node.style.display = "";
 		if(!this.visible) {
 			inc.invisibleList.erase(this.visibilityNode);
@@ -231,6 +339,7 @@ inc.Entry = function(ind, position, DOMnode, DOMfieldnodes) {
 		this.visible = true;
 	}
 	
+	// Marca this como match parcial para o campo whichfield.
 	this.ref = function(whichfield) {
 		this.mask |= (1 << whichfield);
 		
@@ -250,6 +359,7 @@ inc.Entry = function(ind, position, DOMnode, DOMfieldnodes) {
 		}
 	}
 	
+	// Desmarca this como match parcial para o campo whichfield.
 	this.unref = function(whichfield) {
 		this.mask &= ~(1 << whichfield);
 		
@@ -273,7 +383,7 @@ inc.Entry = function(ind, position, DOMnode, DOMfieldnodes) {
 /*
  * Armazena os nós html que caracterizam as linhas da tabela com as provas
  * Os índices associados a cada nó são uma convenção de representação invariante,
- * marcadas no campo index de Entry
+ * marcadas no campo index de Entry.
  */
 inc.entries = [];
 
@@ -283,12 +393,12 @@ inc.entries = [];
 inc.entriesAt = [];
 
 /*
- * inc.busy e inc.pending são usados para contornar (na medida do possível)
- * os problemas que ocorrem por a JVM rodar em um processo distinto, ao mesmo
- * tempo em que o código de Javascript é necessariamente single-threaded.
+ * OBSERVAÇÃO:
+ * Atualmente os arrays inc.entries[] e inc.entriesAt[] não são utilizados.
+ * Eles foram implementados para caso em atualizações futuras se deseje reordenar a tabela dinamicamente.
+ * Nesta caso, o índice de inc.entries[] é uma invariante que caracteriza uma linha, enquanto o índice de
+ * inc.entriesAt[] é um valor alterado dinamicamente que indica a sua posição na tabela.
  */
-inc.busy = false;
-inc.pending = null;
 
 // Insere uma linha na tabela de resultados
 inc.putline = function(ind, mat, ano, prof, desc, link) {
@@ -321,26 +431,28 @@ inc.putline = function(ind, mat, ano, prof, desc, link) {
 	col.appendChild(tmp);
 	line.appendChild(col);
 	
-	col = document.createElement('a');
-	col.style.textDecoration = 'none';
-	col.setAttribute("href", link);
-	/* 1 (hyperlink)
-	var hyperlink = document.createTextNode('Download');
-	col.appendChild(hyperlink);
-	*/
-	/* 2 (botão) */
-	var prefix = document.createTextNode('\u00A0');
-	var suffix = document.createTextNode('\u00A0');
-	var linkbut = document.createElement('input');
-	linkbut.setAttribute("type", 'button');
-	linkbut.setAttribute("value", 'Download');
-	col.appendChild(prefix);
-	col.appendChild(linkbut);
-	col.appendChild(suffix);
-	
+	if(inc.internal_options.link_type == 'text') {
+		col = document.createElement('a');
+		col.style.textDecoration = 'none';
+		col.setAttribute("href", link);
+		var hyperlink = document.createTextNode('Download');
+		col.appendChild(hyperlink);
+	}
+	else if(inc.internal_options.link_type == 'button')
+	{
+		col = document.createElement('a');
+		col.style.textDecoration = 'none';
+		col.setAttribute("href", link);
+		var prefix = document.createTextNode('\u00A0'); // &nbsp
+		var suffix = document.createTextNode('\u00A0');
+		var linkbut = document.createElement('input');
+		linkbut.setAttribute("type", 'button');
+		linkbut.setAttribute("value", 'Download');
+		col.appendChild(prefix);
+		col.appendChild(linkbut);
+		col.appendChild(suffix);
+	}
 	line.appendChild(col);
-	
-	
 	
 	inc.table.appendChild(line);
 	
@@ -353,10 +465,24 @@ inc.putline = function(ind, mat, ano, prof, desc, link) {
 inc.init = function(t) {
 	inc.table = t;
 	
+	/*
+	 * Para evitar race conditions, desabilita o formulário de busca
+	 * até que o banco de dados tenha sido carregado.
+	 */
+	document.getElementById("incsearchform").style.display = 'none';
+	
+	inc.reset();
+	
+	/*
+	 * Carrega o banco de dados do servidor.
+	 * Em versões futuras isto pode ser substituído por um pedido
+	 * CGI que gera o banco de dados dinamicamente, garantindo que
+	 * este estará sempre atualizado.
+	 */
 	console.log('Fazendo pedido http...');
 	$.ajax({
 		url: "db.json",
-		processData: true,
+		processData: true, // Já faz o parsing do arquivo através de jQuery.parseJSON();
 		data: null,
 		dataType: "json",
 		error: function(x) {
@@ -394,7 +520,32 @@ inc.reset = function() {
 		inc.fieldstate[i] = '';
 	}
 	
-	//inc.applet.resetAllStates();
+	for(var i in inc.fieldmap) {
+		if(i != 'inc_desc') {
+			document.getElementById(i).value = "";
+		}
+	}
+	
+	for(var i in inc.default_options) {
+		inc.options[i] = inc.default_options[i];
+		document.getElementById(i).checked = inc.default_options[i];
+	}
+	
+	document.getElementById("inc_descpre").selectedIndex = 0;
+	document.getElementById("inc_descsuf").value = "";
+	
+	for(var iter = inc.invisibleList.begin(); iter !== inc.invisibleList.end(); iter = iter.next) {
+		for(var i = 0; i < inc.nfields; i++)
+			iter.value.ref(i);
+	}
+	
+	for(var i = 0; i < inc.nfields; i++)
+		inc.applyPending(i);
+	
+	
+	if(!inc.invisibleList.empty()) {
+		alert("Erro de lógica no script! inc.invisibleList deveria estar vazia.");
+	}
 }
 
 /*
@@ -414,36 +565,54 @@ var commonsubstr = function(a, b) {
 
 /*
  * Consolida na tabela de resultados a alteração em algum campo de busca.
+ * 
+ * Como modificações extensas na estrutura html do documento são lentas,
+ * este programa usa uma forma de lazy evaluation para apenas consolidar as modificações
+ * necessárias. A alteração dos filtros de busca é feita parte a parte,
+ * e os nós vão dinamicamente se inserindo na ou se removendo da fila inc.pendingList.
+ * Após a seqüência de transformações, inc.pendingList é processada, efetuando
+ * as alterações necessárias na estrutura do documento.
  */
-inc.applychange = function(name, value) {
+inc.applychange = function(id, value) {
 	value = inc.normalizeString(value);
 	
-	if(value == inc.fieldstate[name])
+	if(value == inc.fieldstate[id])
 		return true;
 	
-	//console.log('applychange (name: ' + name + ' ; value: ' + value + ')');
+	//console.log('applychange (id: ' + id + ' ; value: ' + value + ')');
 	
-	var common = commonsubstr(value, inc.fieldstate[name]);
-	var lenchange = common.length - inc.fieldstate[name].length;
+	var common = commonsubstr(value, inc.fieldstate[id]);
+	var lenchange = common.length - inc.fieldstate[id].length;
 	
-	var whichfield = inc.fieldmap[name];
+	var whichfield = inc.fieldmap[id];
 	
+	/*
+	 * Reduz o campo de busca à maior substring comum ao valor anterior e o novo valor.
+	 */
 	if(lenchange < 0) {
 		inc.decrementSearch(whichfield, common);
 	}
 	
+	/*
+	 * Adiciona um sufixo ao campo de busca, a finalizando.
+	 */
 	if(value.length > common.length) {
 		inc.incrementSearch(whichfield, common, value);
 	}
 	
-	inc.fieldstate[name] = value;
+	inc.fieldstate[id] = value;
 	
+	/*
+	 * Aplica as mudanças pendentes.
+	 */
 	inc.applyPending(whichfield);
 	
-	// DEBUG
-	console.log("# visible: " + inc.visibleList.size());
-	console.log("# invisible: " + inc.invisibleList.size());
-	console.log("---------------");
+	if(inc.internal_options.debug_info) {
+		console.log("---------------");
+		console.log("# visible: " + inc.visibleList.size());
+		console.log("# invisible: " + inc.invisibleList.size());
+		console.log("---------------");
+	}
 }
 
 /*
@@ -458,6 +627,11 @@ inc.fieldchange = function(e) {
 /*
  * Event handler para a modificação da descrição da provas
  * (i.e. Prova/Lista/Provinha junto com um opcional número)
+ * 
+ * Não valida o campo numérico.
+ * Isto é proposital, para permitir que provas com sufixos (tal como P1(2))
+ * sejam buscadas. Como isto não é aparente no uso, provavalmente só quem
+ * saberá deste 'hack' é quem ler o código fonte :P
  */
 inc.descchange = (function() {
 	var tipo = document.getElementById("inc_descpre");
@@ -475,5 +649,30 @@ inc.descchange = (function() {
 		}
 		
 		return inc.fieldchange({id: "inc_desc", value: tipo[tipo.selectedIndex].value + num.value});
+	};
+})();
+
+/*
+ * Event handler para alterações nas opções de busca.
+ * Assume que as opções são definidas por checkboxes.
+ */
+inc.optionchange = (function() {
+	
+	/*
+	 * Define os valores padrão.
+	 */
+	for(var i in inc.options) {
+		document.getElementById(i).checked = inc.options[i];
+	}
+	
+	// closure
+	return function(e) {
+		if(inc.options[e.id] == e.checked)
+			return true;
+		
+		inc.options[e.id] = e.checked;
+		inc.touch();
+		
+		return true;
 	};
 })();
