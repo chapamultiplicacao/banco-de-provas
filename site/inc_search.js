@@ -505,24 +505,19 @@ inc.entriesAt = [];
 	}
 	
 	inc.seterror = function(whichfield) {
-		if(inc.fielderrorf[whichfield])
-			return;
-		
 		inc.setbg(whichfield, inc.internal_options.errorbg);
 		
 		inc.fielderrorf[whichfield] = true;
 	}
 	
 	inc.regexmode = function(whichfield) {
+		
 		inc.setbg(whichfield, inc.internal_options.regexbg);
 		
 		inc.fieldregexf[whichfield] = true;
 	}
 	
 	inc.clearerror = function(whichfield) {
-		if(!inc.fielderrorf[whichfield])
-			return;
-		
 		if(inc.fieldregexf[whichfield])
 			inc.setbg(whichfield, inc.internal_options.regexbg);
 		else
