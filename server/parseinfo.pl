@@ -2,11 +2,13 @@
 
 # formato: matéria ano professor descrição
 
+my $base = "http://camatimeusp.org/arquivos/";
+
 use strict;
 use URI::Escape;
 
 sub getinfo {
-    my $res = qr/([pl]\d+)|(provinha\d*)|(p?sub)|(rec)|(avalia(c|(ç))ao)/i;
+    my $res = qr/^(([pl]\d+)|(provinha\d*)|(p?sub)|(rec)|(avalia(c|(ç))ao))/i;
     
     my @parts = (split(/_/, $_[0]));
     my $i = 0;
@@ -81,5 +83,5 @@ while(<>) {
         substr($fields[3], 0, 1) = uc substr($fields[3], 0, 1);
     }
     
-    &putcsv(@fields, "http://camatimeusp.org/arquivos/" . $original_fn);
+    &putcsv(@fields, $base . $original_fn);
 }

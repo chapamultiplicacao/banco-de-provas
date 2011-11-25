@@ -1,0 +1,52 @@
+
+v , _
+W
+K 'ÍT r/
+_ 
+2.
+'zü' _
+3.
+4.
+5.
+Primeira Prova de MAC-110
+Primeiro semestre de 2003
+Prof. Fabio
+o Duração: 1 hora e 45 minutos.
+o A prova deve ser feita a lápis.
+1. (2 pontos) Escreva uma classe Time que contenha os seguintes atributos.
+ “°`“  *L ¬«Ts'<“
+o numeroilelogos "\'Í ,\
+ rl;
+n numeroDeVitorias
+0 numeroDeEmpates
+o numeroDeD‹-:rrotas
+Escreva. também um (único) método para carregar os valores iniciais destes atributos. A seguir
+escreva os seguintes métodos.
+ø calculaTotalDePontosGanhos () que devolve o total de pontos ganhos (cada vitória vale
+3 pontos, cada ernpate vale 1 ponto e cada derrotavale O).
+z calcu1aAproveicamento () que devolve um número entre O e 1 que indica o indice :lc
+aproveitamento do tnne, ou seja a íraçào entre os pontos disputados e os pontos ganhos,
+Para implementar este método utilize obrigatoriamente o método anterior.
+(2 pontos) Escreva um método que recebe dois números naturais (m e n) como parametro e
+devolve um valor booleano indicando se a soma dos dígitos de m é igual à soma dos dígitos de n.
+(2 pontos) Rastreie a execução do método da questão 2) em uma chamada onde m é o seu número
+USP e n é 123456. Lembre-se que ao rastrear o programa você deve montar uma tabela contendo
+todas as variáveis locais do método e do objeto em questão bem como o valor dos parâmetros m
+e n. A cada passo da execução do programa que alterar algum valor, você deve indicar o novo
+valor na tabela. Finalmente, você deve indicar qual o valor devolvido pelo método.
+(2 pontos) Escreva um método para testar o método da questão 2). Seu teste deve cobrir um
+bom número de casos diferentes.
+(2 pontos) Escreva uma classe Matematica contendo o método double seu (double x, double
+precisao) que calcula o sono de x com erro menor que precisao. Sua implementação deve se
+basear na seguinte fórmula para o seno.
+13 Is 11 19
+YZHH Jxàr sen(a,)Íxfí!+ší~í+šf..
+W Â «Ã
+L) 'l ~‹~. of
+Divirta-se e boa prova!
+l V. 1 ¡ »`, mp \`
+ ›  Y_â×
+`\ ›,1(1”z
+` vi z^"l`¿.×TvU,*
+f
+

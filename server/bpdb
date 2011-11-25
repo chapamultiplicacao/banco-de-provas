@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# bpdb.cfg.sh é criado pela makefile
+. bpdb.cfg.sh
+export BASEFOLDER
+export LUA
+
+WD=`pwd`
+cd $BASEFOLDER
+
+source bpdb-utils.sh
+initenv;
+
+case $1 in
+	"update")
+		cmd="./updatedb.sh"
+	;;
+	"generate")
+		cmd="./generatedb.sh"
+	;;
+	"validate")
+		cmd="./validate.sh"
+	;;
+	*)
+		echo "Opção \`$1' não reconhecida."
+		exit -1;
+	;;
+esac
+
+shift;
+
+. $cmd $*;
+exit $?
