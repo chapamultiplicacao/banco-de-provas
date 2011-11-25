@@ -3,6 +3,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <head>
+	
+	<script type="text/javascript" src="lib/jquery-1.7.min.js"></script>
 
 	<style type="text/css">
 		#incsearchform {
@@ -101,13 +103,34 @@
 			<label># <input type="text" class="text2" name="inc_numero" id="inc_descsuf" onkeyup="return inc.descchange();"/>
 			</label></li>
 				<li><label><strong>Ano:</strong>
-				<input type="text" class="text3" id="inc_ano" maxlength="4" onkeyup="return inc.fieldchange(this);"/>
+				<input type="text" class="text3" id="inc_ano" onkeyup="return inc.fieldchange(this);"/>
 			</label></li>
 			<li>
 				<input type="checkbox" id="caseSensitive" onclick="return inc.optionchange(this);" onchange="return inc.optionchange(this);" /><label> Diferenciar maiúsculas de minúsculas</label>
 			</li>
 			<li>
 				<input type="checkbox" id="nilIsntWildcard" onclick="return inc.optionchange(this);" onchange="return inc.optionchange(this);" /><label> Filtrar campos não existentes</label>
+			</li>
+			<li>
+				<input type="checkbox" id="regexEnabled" onclick="return inc.optionchange(this);" onchange="return inc.optionchange(this);" /><label> Habilitar buscas por expressões regulares</label>
+				<label> &nbsp; <a href="javascript:void(0)" onclick="$(document.getElementById('regexInfo')).toggle('slow');">Como assim?</a> </label>
+			</li>
+			<li id="regexInfo" style="display: none">
+				<div style='text-align: justify; width: 50em; text-indent: 1.61em; padding-left: 1.5em; font-family: courier; font-size: 80%; color: #555555;'>
+					<p>
+						Uma vez habilitada a busca por expressões regulares, um campo de busca será filtrado por uma expressão regular R se o seu conteúdo for /R/. O caractere '/' deve aparecer necessariamente como primeiro e último caractere do campo de busca.
+					</p>
+					<p>
+						Quando a busca por expressões regulares está habilitada e o caractere '/' é inserido como o primeiro símbolo de um campo de busca, o fundo deste se torna amarelo para indicar que está em modo de expressão regular e que a expressão está incompleta. Quando uma expressão regular é finalizada, o fundo se torna azul. Um fundo vermelho indica erro de sintaxe.
+					</p>
+					<p>
+						Modificadores, como no caso de /R/i, não são suportados, embora a opção 'Diferenciar maiúsculas de minúsculas' também se aplique a buscas por expressões regulares. Um caractere '/' literal pode ser inserido em uma expressão regular através de escape por barra invertida. A busca por expressões regulares <em>não é incremental</em>. A busca é efetivada no instante em que o caractere '/' inicial é pareado com um '/' terminal.
+					</p>
+					<br/>
+					<p>
+						A linguagem de expressões regulares suportada é a da especificação ECMAScript, sendo um subconjunto próprio da linguagem suportada por Perl 5.
+					</p>
+				</div>
 			</li>
 			<li>
 				<input type="button" id="inc_resetbutton" value="Limpar" onclick="inc.reset()" />
@@ -146,7 +169,6 @@
 		<tbody id="search_output"></tbody>
 	</table>
 	
-	<script type="text/javascript" src="lib/jquery-1.7.min.js"></script>
 	<script type="text/javascript" src="lib/data_structures.js"></script>
 	<script type="text/javascript" src="inc_search.js"></script>
 	<script type="text/javascript">

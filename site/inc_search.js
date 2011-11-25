@@ -8,11 +8,15 @@ inc.internal_options = {
 	// Forma em que o link para os arquivos das provas é apresentado. Pode ser 'button' ou 'text'.
 	link_type: 'button',
 	debug_info: false,
+	errorbg: '#ff4444',
+	regexbg: '#ffff55',
+	completeregexbg: '#4ec0ff',
 };
 
 inc.default_options = {
 	caseSensitive: false,
 	nilIsntWildcard: false,
+	regexEnabled: true,
 };
 
 inc.options = (function(){
@@ -24,7 +28,9 @@ inc.options = (function(){
 	return ret;
 });
 
-inc.nilstr = "\u00A0";
+inc.nbsp = "\u00A0"
+
+inc.nilstr = inc.nbsp;
 
 /*
  * Associa os campos do formulário de busca aos seus identificadores numéricos.
@@ -79,6 +85,12 @@ inc.nfields = (
 			}
 		)()
 );
+
+/* Flags de erro */
+inc.fielderrorf = new Array(inc.nfields);
+
+/* Flags indicando modo regex */
+inc.fieldregexf = new Array(inc.nfields);
 
 /*
  * Assume inc.nfields < 32
@@ -144,7 +156,7 @@ inc.decrementSearch = function(whichfield, newstring) {
 		var matches = false;
 		var candidate = iter.value.value(whichfield);
 		
-		if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
+		if(!inc.options.nilIsntWildcard && candidate.length === 0) {
 			matches = true;
 		}
 		else if(candidate.length >= newlen) {
@@ -175,7 +187,7 @@ inc.decrementSearch = function(whichfield, newstring) {
 			var matches = false;
 			var candidate = iter.value.value(i);
 			
-			if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
+			if(!inc.options.nilIsntWildcard && candidate.length === 0) {
 				matches = true;
 			}
 			else if(candidate.length >= newlen) {
@@ -204,7 +216,7 @@ inc.incrementSearch = function(whichfield, oldstring, newstring) {
 		var matches = true;
 		var candidate = iter.value.value(whichfield);
 		
-		if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
+		if(!inc.options.nilIsntWildcard && candidate.length === 0) {
 			matches = true;
 		}
 		else if(candidate.length < newlen) {
@@ -215,6 +227,75 @@ inc.incrementSearch = function(whichfield, oldstring, newstring) {
 		}
 		
 		if(!matches) {
+			iter.value.unref(whichfield);
+		}
+	}
+}
+
+inc.REGEXmatch = function(whichfield, value) {
+	var r;
+	
+	inc.regexmode(whichfield);
+	
+	if(value.length <= 1)
+		return;
+	
+	var inner = value.substring(1, value.length-1)
+	
+	if(inner == '/' || (/[^\\]\//.test(inner))) {
+		inc.seterror(whichfield);
+		return;
+	}
+	
+	if(value.substring(value.length-1, value.length) != '/' || inner.substring(inner.length-1, inner.length) == '\\') {
+		return;
+	}
+	
+	try {
+		r = new RegExp(inner, (inc.options.caseSensitive ? "" : "i"));
+		inc.clearerror(whichfield);
+		inc.setbg(whichfield, inc.internal_options.completeregexbg);
+	}
+	catch(e) {
+		inc.seterror(whichfield);
+		console.log(e);
+		return;
+	}
+	
+	for(var iter = inc.invisibleList.begin(); iter !== inc.invisibleList.end(); iter = iter.next) {
+		var matches;
+		var candidate = iter.value.value(whichfield);
+		
+		if(!inc.options.nilIsntWildcard && candidate.length === 0) {
+			matches = true;
+		}
+		else {
+			matches = r.test(candidate);
+		}
+		
+		if(matches) {
+			iter.value.ref(whichfield);
+		}
+		else {
+			iter.value.unref(whichfield);
+		}
+	}
+	
+	for(var iter = inc.visibleList.begin(); iter !== inc.visibleList.end(); iter = iter.next) {
+		var matches;
+		var candidate = iter.value.value(whichfield);
+		
+		if(!inc.options.nilIsntWildcard && candidate.length === 0) {
+			matches = true;
+		}
+		else {
+			matches = r.test(candidate);
+		}
+		
+		if(matches) {
+			iter.value.ref(whichfield);
+		}
+		else {
 			iter.value.unref(whichfield);
 		}
 	}
@@ -232,46 +313,54 @@ inc.touch = function(whichfield) {
 	}
 	
 	var newstring = inc.fieldstate[inc.inversefieldmap[whichfield]];
-	var newlen = newstring.length;
 	
-	for(var iter = inc.invisibleList.begin(); iter !== inc.invisibleList.end(); iter = iter.next) {
-		var matches = false;
-		var candidate = iter.value.value(whichfield);
-		
-		if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
-			matches = true;
-		}
-		else if(candidate.length >= newlen) {
-			matches = (inc.normalizeString(candidate.substr(0, newlen)) == newstring);
-		}
-		
-		if(matches) {
-			iter.value.ref(whichfield);
-		}
-		else {
-			iter.value.unref(whichfield);
-		}
+	if(inc.options.regexEnabled && newstring.substring(0,1) == "/") {
+		inc.REGEXmatch(whichfield, newstring);
 	}
-	
-	for(var iter = inc.visibleList.begin(); iter !== inc.visibleList.end(); iter = iter.next) {
-		var matches = true;
-		var candidate = iter.value.value(whichfield);
+	else {
+		inc.clearflags(whichfield);
 		
-		if(!inc.options.nilIsntWildcard && candidate == inc.nilstr) {
-			matches = true;
-		}
-		else if(candidate.length < newlen) {
-			matches = false;
-		}
-		else {
-			matches = (inc.normalizeString(candidate.substr(0, newlen)) == newstring);
+		var newlen = newstring.length;
+		
+		for(var iter = inc.invisibleList.begin(); iter !== inc.invisibleList.end(); iter = iter.next) {
+			var matches = false;
+			var candidate = iter.value.value(whichfield);
+			
+			if(!inc.options.nilIsntWildcard && candidate.length === 0) {
+				matches = true;
+			}
+			else if(candidate.length >= newlen) {
+				matches = (inc.normalizeString(candidate.substr(0, newlen)) == newstring);
+			}
+			
+			if(matches) {
+				iter.value.ref(whichfield);
+			}
+			else {
+				iter.value.unref(whichfield);
+			}
 		}
 		
-		if(matches) {
-			iter.value.ref(whichfield);
-		}
-		else {
-			iter.value.unref(whichfield);
+		for(var iter = inc.visibleList.begin(); iter !== inc.visibleList.end(); iter = iter.next) {
+			var matches = true;
+			var candidate = iter.value.value(whichfield);
+			
+			if(!inc.options.nilIsntWildcard && candidate.length === 0) {
+				matches = true;
+			}
+			else if(candidate.length < newlen) {
+				matches = false;
+			}
+			else {
+				matches = (inc.normalizeString(candidate.substr(0, newlen)) == newstring);
+			}
+			
+			if(matches) {
+				iter.value.ref(whichfield);
+			}
+			else {
+				iter.value.unref(whichfield);
+			}
 		}
 	}
 	
@@ -318,7 +407,12 @@ inc.Entry = function(ind, position, DOMnode, DOMfieldnodes) {
 	
 	// Retorna o valor textual para a coluna whichfield da linha.
 	this.value = function(whichfield) {
-		return this.fieldnodes[whichfield].nodeValue;
+		var ret = this.fieldnodes[whichfield].nodeValue;
+		
+		if(ret === inc.nilstr)
+			return "";
+		else
+			return ret;
 	}
 	
 	this.hide = function() {
@@ -392,6 +486,61 @@ inc.entries = [];
  */
 inc.entriesAt = [];
 
+(function() {
+	var descfield = inc.fieldmap['inc_desc'];
+	var defbg = document.getElementById(inc.inversefieldmap[0]).style.background;
+	
+	inc.setbg = function(whichfield, bg) {
+		bg = (bg ? bg : defbg);
+		
+		var f;
+		if(whichfield == descfield) {
+			f = document.getElementById('inc_descsuf');
+		}
+		else {
+			f = document.getElementById(inc.inversefieldmap[whichfield]);
+		}
+		
+		f.style.background = bg;
+	}
+	
+	inc.seterror = function(whichfield) {
+		if(inc.fielderrorf[whichfield])
+			return;
+		
+		inc.setbg(whichfield, inc.internal_options.errorbg);
+		
+		inc.fielderrorf[whichfield] = true;
+	}
+	
+	inc.regexmode = function(whichfield) {
+		inc.setbg(whichfield, inc.internal_options.regexbg);
+		
+		inc.fieldregexf[whichfield] = true;
+	}
+	
+	inc.clearerror = function(whichfield) {
+		if(!inc.fielderrorf[whichfield])
+			return;
+		
+		if(inc.fieldregexf[whichfield])
+			inc.setbg(whichfield, inc.internal_options.regexbg);
+		else
+			inc.setbg(whichfield);
+		
+		inc.fielderrorf[whichfield] = false;
+		
+	}
+	
+	inc.clearflags = function(whichfield) {
+		inc.fielderrorf[whichfield] = false;
+		inc.fieldregexf[whichfield] = false;
+		
+		inc.setbg(whichfield);
+	}
+	
+})();
+
 /*
  * OBSERVAÇÃO:
  * Atualmente os arrays inc.entries[] e inc.entriesAt[] não são utilizados.
@@ -443,8 +592,8 @@ inc.putline = function(ind, mat, ano, prof, desc, link) {
 		col = document.createElement('a');
 		col.style.textDecoration = 'none';
 		col.setAttribute("href", link);
-		var prefix = document.createTextNode('\u00A0'); // &nbsp
-		var suffix = document.createTextNode('\u00A0');
+		var prefix = document.createTextNode(inc.nbsp);
+		var suffix = document.createTextNode(inc.nbsp);
 		var linkbut = document.createElement('input');
 		linkbut.setAttribute("type", 'button');
 		linkbut.setAttribute("value", 'Download');
@@ -479,7 +628,7 @@ inc.init = function(t) {
 	 * CGI que gera o banco de dados dinamicamente, garantindo que
 	 * este estará sempre atualizado.
 	 */
-	console.log('Fazendo pedido http...');
+	console.log('Fazendo requisição http...');
 	$.ajax({
 		url: "db/db.json",
 		processData: true, // Já faz o parsing do arquivo através de jQuery.parseJSON();
@@ -539,8 +688,10 @@ inc.reset = function() {
 			iter.value.ref(i);
 	}
 	
-	for(var i = 0; i < inc.nfields; i++)
+	for(var i = 0; i < inc.nfields; i++) {
+		inc.clearflags(i);
 		inc.applyPending(i);
+	}
 	
 	
 	if(!inc.invisibleList.empty()) {
@@ -574,30 +725,51 @@ var commonsubstr = function(a, b) {
  * as alterações necessárias na estrutura do documento.
  */
 inc.applychange = function(id, value) {
-	value = inc.normalizeString(value);
-	
-	if(value == inc.fieldstate[id])
-		return true;
-	
-	//console.log('applychange (id: ' + id + ' ; value: ' + value + ')');
-	
-	var common = commonsubstr(value, inc.fieldstate[id]);
-	var lenchange = common.length - inc.fieldstate[id].length;
-	
 	var whichfield = inc.fieldmap[id];
 	
-	/*
-	 * Reduz o campo de busca à maior substring comum ao valor anterior e o novo valor.
-	 */
-	if(lenchange < 0) {
-		inc.decrementSearch(whichfield, common);
+	if(inc.options.regexEnabled && value.substring(0,1) == "/") {
+		if(value == inc.fieldstate[id])
+			return true;
+		
+		inc.REGEXmatch(whichfield, value);
 	}
-	
-	/*
-	 * Adiciona um sufixo ao campo de busca, a finalizando.
-	 */
-	if(value.length > common.length) {
-		inc.incrementSearch(whichfield, common, value);
+	else {
+		if(inc.fieldregexf[whichfield]) {
+			inc.clearflags(whichfield);
+			
+			inc.fieldstate[id] = value;
+			
+			inc.touch(whichfield);
+			
+			return true;
+		}
+		
+		inc.clearerror(whichfield);		
+		
+		value = inc.normalizeString(value);
+		
+		if(value == inc.fieldstate[id])
+			return true;
+		
+		//console.log('applychange (id: ' + id + ' ; value: ' + value + ')');
+		
+		var common = commonsubstr(value, inc.fieldstate[id]);
+		var lenchange = common.length - inc.fieldstate[id].length;
+		
+		/*
+		* Reduz o campo de busca à maior substring comum ao valor anterior e o novo valor.
+		*/
+		if(lenchange < 0) {
+			inc.decrementSearch(whichfield, common);
+			inc.applyPending(whichfield);
+		}
+		
+		/*
+		* Adiciona um sufixo ao campo de busca, a finalizando.
+		*/
+		if(value.length > common.length) {
+			inc.incrementSearch(whichfield, common, value);
+		}
 	}
 	
 	inc.fieldstate[id] = value;
@@ -618,7 +790,7 @@ inc.applychange = function(id, value) {
 /*
  * Event handler para a modificação de algum campo de busca.
  */
-inc.fieldchange = function(e) {
+inc.fieldchange = function(e) {	
 	inc.applychange(e.id, e.value);
 	
 	return true;
