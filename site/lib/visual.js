@@ -1,6 +1,6 @@
 var visual = {};
 
-jQuery.fx.interval = 60;
+jQuery.fx.interval = 50;
 
 visual.arrows = {down: "\u25BC", up: "\u25B2"};
 
@@ -36,5 +36,5 @@ visual.show = function(e) {
 }
 
 visual.hide = function(e) {
-	$(e).fadeOut('normal');
+	$(e).fadeOut(500);
 }
