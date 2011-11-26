@@ -17,6 +17,7 @@ inc.default_options = {
 	caseSensitive: false,
 	nilIsntWildcard: false,
 	regexEnabled: true,
+	fx: true,
 };
 
 inc.options = (function(){
@@ -416,7 +417,10 @@ inc.Entry = function(ind, position, DOMnode, DOMfieldnodes) {
 	}
 	
 	this.hide = function() {
-		this.node.style.display = "none";
+		if(inc.options.fx)
+			visual.hide(this.node);
+		else
+			this.node.style.display = 'none';
 		if(this.visible) {
 			inc.visibleList.erase(this.visibilityNode);
 			inc.invisibleList.push_back_node(this.visibilityNode);
@@ -425,7 +429,7 @@ inc.Entry = function(ind, position, DOMnode, DOMfieldnodes) {
 	}
 	
 	this.show = function() {
-		this.node.style.display = "";
+		this.node.style.display = '';
 		if(!this.visible) {
 			inc.invisibleList.erase(this.visibilityNode);
 			inc.visibleList.push_back_node(this.visibilityNode);

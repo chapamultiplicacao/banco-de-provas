@@ -2,7 +2,7 @@ var visual = {};
 
 visual.arrows = {down: "\u25BC", up: "\u25B2"};
 
-visual.toggle = function(linkNode, dropId) {
+visual.toggleDropdown = function(linkNode, dropId) {
 	$(document.getElementById(dropId)).toggle('slow');
 	
 	var ar = linkNode.lastChild;
@@ -19,7 +19,7 @@ visual.dropdown = function(ref, text, dropId) {
 	var node = document.createElement('a');
 	
 	node.setAttribute('href', 'javascript:void(0)');
-	node.setAttribute('onclick', 'visual.toggle(this, \'' + dropId + '\');');
+	node.setAttribute('onclick', 'visual.toggleDropdown(this, \'' + dropId + '\');');
 	
 	node.appendChild(document.createTextNode(text + "\u00A0"));
 	node.appendChild(document.createTextNode(visual.arrows.down));
@@ -27,4 +27,12 @@ visual.dropdown = function(ref, text, dropId) {
 	document.getElementById(dropId).style.display = 'none';
 	
 	ref.parentNode.replaceChild(node, ref);
+}
+
+visual.show = function(e) {
+	$(e).fadeIn('slow');
+}
+
+visual.hide = function(e) {
+	$(e).fadeOut('slow');
 }
