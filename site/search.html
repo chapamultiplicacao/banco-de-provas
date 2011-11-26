@@ -81,6 +81,18 @@
 			margin:15px 0;
 		}
 	</style>
+	
+	<style>
+		.help {
+			text-align: justify;
+			width: 50em;
+			text-indent: 1.61em;
+			padding-left: 1.5em;
+			font-family: courier, georgia, palatino, times new roman, serif, sans-serif;
+			font-size: 80%;
+			color: #555555;
+		}
+	</style>
 </head>
 
 <body>
@@ -89,7 +101,7 @@
 	</h2>
 	
 	<div id="aboutMe" style='display: none'></div>
-	<div id="aboutMeInfo" style='display: none; text-align: justify; width: 50em; text-indent: 1.61em; padding-left: 1.5em; font-family: courier; font-size: 80%; color: #555555;'>
+	<div id="aboutMeInfo" class="help">
 		<p>
 			Este sistema de busca foi criado para aumentar a funcionalidade e praticidade do banco de provas do CAMat. Ele atua de forma incremental, ou seja, o resultado é refinado conforme se altera os campos de busca. Como infelizmente muitas provas têm informações incompletas, por padrão uma informação ausente corresponde a qualquer conteúdo do campo de busca correspondente. Este comportamento é controlado pela opção 'Filtrar campos não existentes'. Como recurso avançado, a busca também pode ser feita através de expressões regulares.
 		</p>
@@ -142,7 +154,7 @@
 				<label> &nbsp; <div id="regexWhut"></div> </label>
 			</li>
 			<li id="regexInfo" style="display: none">
-				<div style='text-align: justify; width: 50em; text-indent: 1.61em; padding-left: 1.5em; font-family: courier; font-size: 80%; color: #555555;'>
+				<div class="help">
 					<p>
 						Uma vez habilitada a busca por expressões regulares, um campo de busca será filtrado por uma expressão regular R se o seu conteúdo for /R/. O caractere '/' deve aparecer necessariamente como primeiro e último caractere do campo de busca.
 					</p>
@@ -171,22 +183,22 @@
 	
 	<style type="text/css">
 		table.seach_output_table {
-			border-width: 3px;
-			border-spacing: 3px;
+			border-width: 0px;
+			border-spacing: 5px;
 			border-style: solid;
 			border-color: gray;
-			border-collapse: separate;
+			border-collapse: collapse;
 			background-color: white;
 		}
 		table.seach_output_table th {
-			border-width: 1px;
-			padding: 1px;
+			border-width: 2px;
+			padding: 10px;
 			border-style: double;
 			border-color: gray;
 		}
 		table.seach_output_table td {
 			border-width: 1px;
-			padding: 1px;
+			padding: 7px;
 			border-style: solid;
 			border-color: gray;
 		}

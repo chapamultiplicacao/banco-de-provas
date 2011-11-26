@@ -575,6 +575,9 @@ inc.putline = function(ind, mat, ano, prof, desc, link) {
 	col.appendChild(tmp);
 	line.appendChild(col);
 	
+	var outercol = document.createElement('td');
+	outercol.style.borderWidth = "0";
+	
 	if(inc.internal_options.link_type == 'text') {
 		col = document.createElement('a');
 		col.style.textDecoration = 'none';
@@ -596,7 +599,8 @@ inc.putline = function(ind, mat, ano, prof, desc, link) {
 		col.appendChild(linkbut);
 		col.appendChild(suffix);
 	}
-	line.appendChild(col);
+	outercol.appendChild(col);
+	line.appendChild(outercol);
 	
 	inc.table.appendChild(line);
 	
