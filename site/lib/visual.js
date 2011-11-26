@@ -1,5 +1,7 @@
 var visual = {};
 
+jQuery.fx.interval = 60;
+
 visual.arrows = {down: "\u25BC", up: "\u25B2"};
 
 visual.toggleDropdown = function(linkNode, dropId) {
@@ -34,5 +36,5 @@ visual.show = function(e) {
 }
 
 visual.hide = function(e) {
-	$(e).fadeOut('slow');
+	$(e).fadeOut('normal');
 }
