@@ -28,7 +28,7 @@ inc.options = (function(){
 	return ret;
 });
 
-inc.nbsp = "\u00A0"
+inc.nbsp = "\u00A0";
 
 inc.nilstr = inc.nbsp;
 

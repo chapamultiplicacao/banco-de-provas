@@ -19,12 +19,29 @@ LinkedList = function() {
 		return newnode;
 	}
 	
+	this.erase = function(N) {
+		N.prev.next = N.next;
+		N.next.prev = N.prev;
+		
+		this.internal_size--;
+		
+		return N.value;
+	}
+	
 	this.pop_back = function() {
 		var ret = this.head.prev;
 		this.head.prev = ret.prev;
 		ret.prev.next = this.head;
 		
 		this.internal_size--;
+		
+		return ret;
+	}
+	
+	this.pop_front = function() {
+		var ret = this.head.next;
+		
+		this.erase(ret);
 		
 		return ret;
 	}
@@ -38,15 +55,6 @@ LinkedList = function() {
 		this.internal_size++;
 		
 		return N;
-	}
-	
-	this.erase = function(N) {
-		N.prev.next = N.next;
-		N.next.prev = N.prev;
-		
-		this.internal_size--;
-		
-		return N.value;
 	}
 	
 	this.begin = function() {

@@ -5,6 +5,8 @@
 <head>
 	
 	<script type="text/javascript" src="lib/jquery-1.7.min.js"></script>
+	<script type="text/javascript" src="lib/data_structures.js"></script>
+	<script type="text/javascript" src="lib/visual.js"></script>
 
 	<style type="text/css">
 		#incsearchform {
@@ -82,7 +84,31 @@
 </head>
 
 <body>
-	<form id="incsearchform" action="" enctype="multipart/form-data" style="display: none">
+	<h2>
+		Sistema de busca do banco de provas do CAMat
+	</h2>
+	
+	<div id="aboutMe" style='display: none'></div>
+	<div id="aboutMeInfo" style='display: none; text-align: justify; width: 50em; text-indent: 1.61em; padding-left: 1.5em; font-family: courier; font-size: 80%; color: #555555;'>
+		<p>
+			Este sistema de busca foi criado para aumentar a funcionalidade e praticidade do banco de provas do CAMat. Ele atua de forma incremental, ou seja, o resultado é refinado conforme se altera os campos de busca. Como infelizmente muitas provas têm informações incompletas, por padrão uma informação ausente corresponde a qualquer conteúdo do campo de busca correspondente. Este comportamento é controlado pela opção 'Filtrar campos não existentes'. Como recurso avançado, a busca também pode ser feita através de expressões regulares.
+		</p>
+		<br />
+		Criado pela gestão <strong>MultiplicAção</strong>. Estamos abertos a críticas e sugestões.
+		<br /><br />
+		<em>Desenvolvedores:</em>
+		<ul>
+			<li>
+				Fabrício Puppi
+			</li>
+		</ul>
+	</div>
+	
+	<script type="text/javascript">
+		visual.dropdown(document.getElementById('aboutMe'), 'Sobre o mecanismo de busca', 'aboutMeInfo');
+	</script>
+	
+	<form id="incsearchform" action="inc.touch();" enctype="multipart/form-data" style="display: none">
 	<fieldset>
 		<ul>
 			<li><label><strong>Nome do professor:</strong>
@@ -113,7 +139,7 @@
 			</li>
 			<li>
 				<input type="checkbox" id="regexEnabled" onclick="return inc.optionchange(this);" onchange="return inc.optionchange(this);" /><label> Habilitar buscas por expressões regulares</label>
-				<label> &nbsp; <a href="javascript:void(0)" onclick="$(document.getElementById('regexInfo')).toggle('slow');">Como assim?</a> </label>
+				<label> &nbsp; <div id="regexWhut"></div> </label>
 			</li>
 			<li id="regexInfo" style="display: none">
 				<div style='text-align: justify; width: 50em; text-indent: 1.61em; padding-left: 1.5em; font-family: courier; font-size: 80%; color: #555555;'>
@@ -138,6 +164,10 @@
 			</ul>
 		</fieldset>
 	</form>
+	
+	<script type="text/javascript">
+		visual.dropdown(document.getElementById('regexWhut'), 'Como assim?', 'regexInfo');
+	</script>
 	
 	<style type="text/css">
 		table.seach_output_table {
@@ -169,7 +199,6 @@
 		<tbody id="search_output"></tbody>
 	</table>
 	
-	<script type="text/javascript" src="lib/data_structures.js"></script>
 	<script type="text/javascript" src="inc_search.js"></script>
 	<script type="text/javascript">
 		inc.init(document.getElementById("search_output"));
